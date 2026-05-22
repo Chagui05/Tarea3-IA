@@ -48,6 +48,7 @@ def main(cfg: DictConfig):
         devices=cfg.trainer.devices,
         check_val_every_n_epoch=cfg.trainer.check_val_every_n_epoch,
         logger=logger,
+        enable_progress_bar=cfg.trainer.enable_progress_bar,
     )
 
     trainer.fit(model, datamodule=datamodule)
