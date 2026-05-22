@@ -161,7 +161,7 @@ class VAEAutoEncoder(L.LightningModule):
             print(y[30:38])
             self.val_x.append(x[30:38].detach().cpu())
             self.val_x_hat.append(x_hat[30:38].detach().cpu())
-            print("len val x", len(val_x))
+            print("len val x", len(self.val_x))
 
         # Para t-SNE usamos el z
         self.val_z.append(z.detach().cpu())
