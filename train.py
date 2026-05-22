@@ -5,7 +5,7 @@ from omegaconf import DictConfig, OmegaConf
 from hydra.utils import to_absolute_path
 from lightning.pytorch.loggers import WandbLogger
 
-from models.vae import VAEAutoEncoder
+from models.vae.model import VAEAutoEncoder
 from data.datamodule import MVTecDataModule
 
 
