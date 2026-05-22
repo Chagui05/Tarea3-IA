@@ -153,7 +153,7 @@ class VAEAutoEncoder(L.LightningModule):
 
         # Guardamos los primeros 16 del primer batch
         if batch_idx == 0:
-            print(y[:8])
+            print("todo y", y)
             self.val_x.append(x[:8].detach().cpu())
             self.val_x_hat.append(x_hat[:8].detach().cpu())
 
