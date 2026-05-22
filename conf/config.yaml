@@ -1,0 +1,12 @@
+defaults:
+  - model: vae
+  - trainer: default
+  - logger: wandb
+  - _self_
+
+seed: 42
+
+data:
+  checkpoint_path: "cache/mvtec_anomaly_detection.pt"
+  batch_size: 32
+  num_workers: 1
