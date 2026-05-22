@@ -153,12 +153,15 @@ class VAEAutoEncoder(L.LightningModule):
 
         # Guardamos los primeros 16 del primer batch
         if batch_idx == 0:
+            print(val_y[:8])
             self.val_x.append(x[:8].detach().cpu())
             self.val_x_hat.append(x_hat[:8].detach().cpu())
 
         if batch_idx == 3:
+            print(val_y[30:38])
             self.val_x.append(x[30:38].detach().cpu())
             self.val_x_hat.append(x_hat[30:38].detach().cpu())
+            print("len val x", len(val_x))
 
         # Para t-SNE usamos el z
         self.val_z.append(z.detach().cpu())
