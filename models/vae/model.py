@@ -8,8 +8,8 @@ import torchvision
 import matplotlib.pyplot as plt
 
 from sklearn.manifold import TSNE
-from decoder import VAEDecoder
-from encoder import VAEEncoder
+from models.vae.model.decoder import VAEDecoder
+from models.vae.model.encoder import VAEEncoder
 
 
 import lightning as L
