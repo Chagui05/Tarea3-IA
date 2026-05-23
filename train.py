@@ -32,6 +32,7 @@ def main(cfg: DictConfig):
             beta=cfg.model.beta,
             loss_type=cfg.model.loss_type,
             use_sigmoid=cfg.model.use_sigmoid,
+            epochs = cfg.trainer.max_epochs
         )
     else:
         raise ValueError(f"Modelo no soportado: {cfg.model.name}")

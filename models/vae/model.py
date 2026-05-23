@@ -25,6 +25,7 @@ class VAEAutoEncoder(L.LightningModule):
         beta: float                = 1e-4,
         loss_type: str             = "l1",
         use_sigmoid: bool          = True,
+        epochs: int                = 10
     ):
         super().__init__()
 
@@ -129,8 +130,8 @@ class VAEAutoEncoder(L.LightningModule):
 
         loss, recon, kl, x_hat, z = self.compute_loss(batch)
 
-        self.log("train/loss", loss, prog_bar=True, on_step=False, on_epoch=True)
-        self.log("train/recon_loss", recon, prog_bar=True, on_step=False, on_epoch=True)
+        self.log("train/loss", loss, prog_bar=False, on_step=False, on_epoch=True)
+        self.log("train/recon_loss", recon, prog_bar=False, on_step=False, on_epoch=True)
         self.log("train/kl_loss", kl, prog_bar=False, on_step=False, on_epoch=True)
 
         return loss
@@ -147,18 +148,17 @@ class VAEAutoEncoder(L.LightningModule):
 
         x, y = batch
 
-        self.log("val/loss", loss, prog_bar=True, on_step=False, on_epoch=True)
-        self.log("val/recon_loss", recon, prog_bar=True, on_step=False, on_epoch=True)
+        self.log("val/loss", loss, prog_bar=False, on_step=False, on_epoch=True)
+        self.log("val/recon_loss", recon, prog_bar=False, on_step=False, on_epoch=True)
         self.log("val/kl_loss", kl, prog_bar=False, on_step=False, on_epoch=True)
 
-        # Guardamos los primeros 16 del primer batch
-        #if batch_idx == 0:
-        #    self.val_x.append(x[:8].detach().cpu())
-        #    self.val_x_hat.append(x_hat[:8].detach().cpu())
-
-        if batch_idx == 3:
-            self.val_x.append(x[:16].detach().cpu())
-            self.val_x_hat.append(x_hat[:16].detach().cpu())
+        # Guardamos del primer y ultimo epoch
+        if batch_idx == 0:
+            self.val_x.append(x[:8].detach().cpu())
+            self.val_x_hat.append(x_hat[:8].detach().cpu())
+        if batch_idx == (self.hparams.epochs)-1:
+            self.val_x.append(x[:8].detach().cpu())
+            self.val_x_hat.append(x_hat[:8].detach().cpu())
 
         # Para t-SNE usamos el z
         self.val_z.append(z.detach().cpu())
@@ -207,8 +207,8 @@ class VAEAutoEncoder(L.LightningModule):
     def test_step(self, batch, batch_idx):
         loss, recon, kl, x_hat, z = self.compute_loss(batch)
 
-        self.log("test/loss", loss, prog_bar=True, on_step=False, on_epoch=True)
-        self.log("test/recon_loss", recon, prog_bar=True, on_step=False, on_epoch=True)
+        self.log("test/loss", loss, prog_bar=False, on_step=False, on_epoch=True)
+        self.log("test/recon_loss", recon, prog_bar=False, on_step=False, on_epoch=True)
         self.log("test/kl_loss", kl, prog_bar=False, on_step=False, on_epoch=True)
 
         return loss
