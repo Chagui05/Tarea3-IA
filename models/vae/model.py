@@ -152,21 +152,13 @@ class VAEAutoEncoder(L.LightningModule):
         self.log("val/kl_loss", kl, prog_bar=False, on_step=False, on_epoch=True)
 
         # Guardamos los primeros 16 del primer batch
-        if batch_idx == 0:
-            print("todo y 1", y)
-            self.val_x.append(x[:8].detach().cpu())
-            self.val_x_hat.append(x_hat[:8].detach().cpu())
-
-        if batch_idx == 1:
-            print("todo y 1", y)
-
-        if batch_idx == 2:
-            print("todo y 2", y)
+        #if batch_idx == 0:
+        #    self.val_x.append(x[:8].detach().cpu())
+        #    self.val_x_hat.append(x_hat[:8].detach().cpu())
 
         if batch_idx == 3:
-            print("todo y 3", y)
-            self.val_x.append(x[30:38].detach().cpu())
-            self.val_x_hat.append(x_hat[30:38].detach().cpu())
+            self.val_x.append(x[:16].detach().cpu())
+            self.val_x_hat.append(x_hat[:16].detach().cpu())
 
         # Para t-SNE usamos el z
         self.val_z.append(z.detach().cpu())
