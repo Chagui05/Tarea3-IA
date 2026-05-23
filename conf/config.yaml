@@ -1,5 +1,5 @@
 defaults:
-  - data: mvtec_tensor
+  - data: mvtec
   - model: vae
   - trainer: default
   - logger: wandb
