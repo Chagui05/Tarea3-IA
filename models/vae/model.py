@@ -156,6 +156,7 @@ class VAEAutoEncoder(L.LightningModule):
         if batch_idx == 0:
             self.val_x.append(x[:8].detach().cpu())
             self.val_x_hat.append(x_hat[:8].detach().cpu())
+        print((self.hparams.epochs)-1)
         if batch_idx == (self.hparams.epochs)-1:
             self.val_x.append(x[:8].detach().cpu())
             self.val_x_hat.append(x_hat[:8].detach().cpu())
