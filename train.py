@@ -33,6 +33,7 @@ def main(cfg: DictConfig):
             loss_type=cfg.model.loss_type,
             use_sigmoid=cfg.model.use_sigmoid,
         )
+    # elif cfg.model.name == "u-net":
     else:
         raise ValueError(f"Modelo no soportado: {cfg.model.name}")
 
@@ -53,6 +54,7 @@ def main(cfg: DictConfig):
         logger=logger,
     )
 
+    # Esta se encarga de entrenar
     trainer.fit(model, datamodule=datamodule)
     # Aquí se loggean reconstrucciones good vs anomalías.
     trainer.test(model, datamodule=datamodule)

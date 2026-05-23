@@ -31,6 +31,7 @@ class VAEAutoEncoder(L.LightningModule):
         if hidden_channels is None:
             hidden_channels = [32, 64, 128, 256]
 
+        # Así podemos accederlos más fácil luego
         self.save_hyperparameters()
 
         self.encoder = VAEEncoder(
@@ -50,12 +51,12 @@ class VAEAutoEncoder(L.LightningModule):
 
     def reparameterize(self, mu: torch.Tensor, logvar: torch.Tensor) -> torch.Tensor:
         """
-        Aplica el reparameterization, un sample del espacio latente:
+        Aplica el reparameterization, para obtener un sample del espacio latente:
         z = mu + std * eps
         """
         std = torch.exp(0.5 * logvar)
         eps = torch.randn_like(std)
-        z = mu + std * eps
+        z = mu + std * eps # El eps es quien añade lo random
 
         return z
 
@@ -74,7 +75,7 @@ class VAEAutoEncoder(L.LightningModule):
 
     def reconstruction_loss(self, x_hat: torch.Tensor, x: torch.Tensor) -> torch.Tensor:
         """
-        Calcula la reconstruction_loss según la configuración.
+        Elige el loss dependiendo de la config elegida.
         """
         loss_type = self.hparams.loss_type.lower()
 
@@ -118,9 +119,9 @@ class VAEAutoEncoder(L.LightningModule):
 
         x_hat, mu, logvar, z = self.forward(x)
 
+        # Aplicamos las loss especiales de un VAE
         recon = self.reconstruction_loss(x_hat, x)
         kl = self.kl_loss(mu, logvar)
-
         loss = recon + self.hparams.beta * kl
 
         return loss, recon, kl, x_hat, z
@@ -134,6 +135,9 @@ class VAEAutoEncoder(L.LightningModule):
         self.log("train/kl_loss", kl, prog_bar=False, on_step=False, on_epoch=True)
 
         return loss
+
+#--------------------------------------- Validation --------------------------------#
+
 
     def on_validation_epoch_start(self):
         self.val_z = []
@@ -174,7 +178,7 @@ class VAEAutoEncoder(L.LightningModule):
             self.val_x_hat.clear()
             return
 
-        # Primero reconstruimos validación
+        # Primero mostramos las reconstrucciones de imágenes
         if len(self.val_x) > 0 and len(self.val_x_hat) > 0:
             x = torch.cat(self.val_x, dim=0)
             x_hat = torch.cat(self.val_x_hat, dim=0)
@@ -200,6 +204,8 @@ class VAEAutoEncoder(L.LightningModule):
         self.val_x.clear()
         self.val_x_hat.clear()
 
+
+#--------------------------------------- Testing --------------------------------#
     def on_test_epoch_start(self):
         self.test_good_x = []
         self.test_good_x_hat = []
@@ -222,6 +228,8 @@ class VAEAutoEncoder(L.LightningModule):
         anom_mask = defect_code != 0
 
         # Guardamos 8 good
+        # Elegimos cuando < 2, para así elegir de distintos batches
+        # y tener distintas clases
         if good_mask.any() and len(self.test_good_x) < 2:
             self.test_good_x.append(x[good_mask][:4].detach().cpu())
             self.test_good_x_hat.append(x_hat[good_mask][:4].detach().cpu())
@@ -237,6 +245,7 @@ class VAEAutoEncoder(L.LightningModule):
         if self.logger is None:
             return
 
+        # Sacamos para poder tener las reconstrucciones de testing
         if len(self.test_good_x) > 0 and len(self.test_anom_x) > 0:
             good_x = torch.cat(self.test_good_x, dim=0)
             good_x_hat = torch.cat(self.test_good_x_hat, dim=0)
@@ -277,6 +286,7 @@ class VAEAutoEncoder(L.LightningModule):
         self.test_anom_x.clear()
         self.test_anom_x_hat.clear()
 
+    # En este caso utilizaremos Adam como optimizador
     def configure_optimizers(self):
         optimizer = torch.optim.Adam(
             self.parameters(),
@@ -293,8 +303,8 @@ class VAEAutoEncoder(L.LightningModule):
         nrow: int = 16,
     ):
         """
-        Loggea una cuadricula de imágenes en WandB.
-        images debe venir en formato [N, C, H, W].
+        Loggea una cuadricula de imágenes en WandB
+        imagenes debe venir en formato [N, C, H, W]
         """
         if self.logger is None:
             return
@@ -315,7 +325,7 @@ class VAEAutoEncoder(L.LightningModule):
 
     def _log_tsne(self, z: torch.Tensor, labels: torch.Tensor):
         """
-        Aplica t-SNE al espacio latente y lo loggea como figura en WandB.
+        Aplica t-SNE al espacio latente y lo loggea como figura en wandnb
         """
         if self.logger is None:
             return
