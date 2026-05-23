@@ -200,14 +200,82 @@ class VAEAutoEncoder(L.LightningModule):
         self.val_x.clear()
         self.val_x_hat.clear()
 
+    def on_test_epoch_start(self):
+        self.test_good_x = []
+        self.test_good_x_hat = []
+        self.test_anom_x = []
+        self.test_anom_x_hat = []
+
     def test_step(self, batch, batch_idx):
         loss, recon, kl, x_hat, z = self.compute_loss(batch)
-
+        x, y = batch
         self.log("test/loss", loss, prog_bar=False, on_step=False, on_epoch=True)
         self.log("test/recon_loss", recon, prog_bar=False, on_step=False, on_epoch=True)
         self.log("test/kl_loss", kl, prog_bar=False, on_step=False, on_epoch=True)
 
+        # En test, y tiene forma [B, 2]:
+        # y[:, 0] = clase del objeto
+        # y[:, 1] = tipo de defecto
+        defect_code = y[:, 1]
+
+        good_mask = defect_code == 0
+        anom_mask = defect_code != 0
+
+        # Guardamos 8 good
+        if good_mask.any() and len(self.test_good_x) < 2:
+            self.test_good_x.append(x[good_mask][:4].detach().cpu())
+            self.test_good_x_hat.append(x_hat[good_mask][:4].detach().cpu())
+
+        # Guardamos 8 anomalías
+        if anom_mask.any() and len(self.test_anom_x) < 2:
+            self.test_anom_x.append(x[anom_mask][:4].detach().cpu())
+            self.test_anom_x_hat.append(x_hat[anom_mask][:4].detach().cpu())
+
         return loss
+
+    def on_test_epoch_end(self):
+        if self.logger is None:
+            return
+
+        if len(self.test_good_x) > 0 and len(self.test_anom_x) > 0:
+            good_x = torch.cat(self.test_good_x, dim=0)
+            good_x_hat = torch.cat(self.test_good_x_hat, dim=0)
+
+            anom_x = torch.cat(self.test_anom_x, dim=0)
+            anom_x_hat = torch.cat(self.test_anom_x_hat, dim=0)
+
+            # por si algún batch tenía
+            good_x = good_x[:8]
+            good_x_hat = good_x_hat[:8]
+            anom_x = anom_x[:8]
+            anom_x_hat = anom_x_hat[:8]
+
+            comparison = torch.cat(
+                [
+                    good_x,
+                    good_x_hat,
+                    anom_x,
+                    anom_x_hat,
+                ],
+                dim=0,
+            )
+
+            self._log_image_grid(
+                key="test/good_vs_anomaly_reconstructions",
+                images=comparison,
+                caption=(
+                    "Fila 1: good originales | "
+                    "Fila 2: good reconstruidas | "
+                    "Fila 3: anomalías originales | "
+                    "Fila 4: anomalías reconstruidas"
+                ),
+                nrow=8,
+            )
+
+        self.test_good_x.clear()
+        self.test_good_x_hat.clear()
+        self.test_anom_x.clear()
+        self.test_anom_x_hat.clear()
 
     def configure_optimizers(self):
         optimizer = torch.optim.Adam(
@@ -217,9 +285,15 @@ class VAEAutoEncoder(L.LightningModule):
         return optimizer
 
     ## ------------------ Funciones Auxiliares para logging -------------------------------- ##
-    def _log_image_grid(self, key: str, images: torch.Tensor, caption: str = ""):
+    def _log_image_grid(
+        self,
+        key: str,
+        images: torch.Tensor,
+        caption: str = "",
+        nrow: int = 16,
+    ):
         """
-        Loggea una grilla de imágenes en WandB.
+        Loggea una cuadricula de imágenes en WandB.
         images debe venir en formato [N, C, H, W].
         """
         if self.logger is None:
@@ -227,11 +301,10 @@ class VAEAutoEncoder(L.LightningModule):
 
         grid = torchvision.utils.make_grid(
             images,
-            nrow=16,
+            nrow=nrow,
             normalize=False,
         )
 
-        # WandB trabaja más cómodo con formato HWC.
         grid_np = grid.detach().cpu().permute(1, 2, 0).numpy()
 
         self.logger.experiment.log({
