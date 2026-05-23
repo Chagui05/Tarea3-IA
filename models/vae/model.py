@@ -25,7 +25,6 @@ class VAEAutoEncoder(L.LightningModule):
         beta: float                = 1e-4,
         loss_type: str             = "l1",
         use_sigmoid: bool          = True,
-        epochs: int                = 10
     ):
         super().__init__()
 
@@ -153,14 +152,7 @@ class VAEAutoEncoder(L.LightningModule):
         self.log("val/kl_loss", kl, prog_bar=False, on_step=False, on_epoch=True)
 
         # Guardamos del primer y ultimo epoch
-        if batch_idx == 0:
-            self.val_x.append(x[:8].detach().cpu())
-            self.val_x_hat.append(x_hat[:8].detach().cpu())
-
-        print("s", (self.hparams.epochs)-1, batch_idx)
-        print("f", (self.hparams.epochs)-1 == batch_idx)
-        if batch_idx == (self.hparams.epochs)-1:
-            print("si")
+        if len(self.val_x) < 2:
             self.val_x.append(x[:8].detach().cpu())
             self.val_x_hat.append(x_hat[:8].detach().cpu())
 
