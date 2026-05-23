@@ -47,11 +47,15 @@ def main(cfg: DictConfig):
         accelerator=cfg.trainer.accelerator,
         devices=cfg.trainer.devices,
         check_val_every_n_epoch=cfg.trainer.check_val_every_n_epoch,
+        log_every_n_steps=cfg.trainer.log_every_n_steps,
+        deterministic=cfg.trainer.deterministic,
+        benchmark=cfg.trainer.benchmark,
         logger=logger,
-        enable_progress_bar=cfg.trainer.enable_progress_bar,
     )
 
     trainer.fit(model, datamodule=datamodule)
+    # Aquí se loggean reconstrucciones good vs anomalías.
+    trainer.test(model, datamodule=datamodule)
 
 
 if __name__ == "__main__":

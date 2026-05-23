@@ -1,0 +1,3 @@
+checkpoint_path: "/content/drive/MyDrive/Tarea3/cache/mvtec_anomaly_detection.pt"
+batch_size: 32
+num_workers: 1
