@@ -151,7 +151,7 @@ class VAEAutoEncoder(L.LightningModule):
         self.log("val/recon_loss", recon, prog_bar=False, on_step=False, on_epoch=True)
         self.log("val/kl_loss", kl, prog_bar=False, on_step=False, on_epoch=True)
 
-        # Guardamos del primer y ultimo epoch
+        # Guardamos imagens variadas
         if len(self.val_x) < 2:
             self.val_x.append(x[:8].detach().cpu())
             self.val_x_hat.append(x_hat[:8].detach().cpu())
@@ -176,8 +176,8 @@ class VAEAutoEncoder(L.LightningModule):
 
         # Primero reconstruimos validación
         if len(self.val_x) > 0 and len(self.val_x_hat) > 0:
-            x = self.val_x[0]
-            x_hat = self.val_x_hat[0]
+            x = torch.cat(self.val_x, dim=0)
+            x_hat = torch.cat(self.val_x_hat, dim=0)
 
             comparison = torch.cat([x, x_hat], dim=0)
 
