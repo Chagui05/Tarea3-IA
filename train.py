@@ -1,3 +1,4 @@
+import importlib
 import hydra
 import lightning as L
 
@@ -33,7 +34,18 @@ def main(cfg: DictConfig):
             loss_type=cfg.model.loss_type,
             use_sigmoid=cfg.model.use_sigmoid,
         )
-    # elif cfg.model.name == "u-net":
+    elif cfg.model.name == "u-net":
+        # importlib porque Python no permite importar módulos con guión via dot-notation
+        unet_module = importlib.import_module("models.u-net.model")
+        UNetAutoEncoder = unet_module.UNetAutoEncoder
+        model = UNetAutoEncoder(
+            in_channels=cfg.model.in_channels,
+            image_size=cfg.model.image_size,
+            hidden_channels=list(cfg.model.hidden_channels),
+            lr=cfg.model.lr,
+            loss_type=cfg.model.loss_type,
+            use_sigmoid=cfg.model.use_sigmoid,
+        )
     else:
         raise ValueError(f"Modelo no soportado: {cfg.model.name}")
 
