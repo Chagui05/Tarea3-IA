@@ -1,1 +1,6 @@
 dataset/
+.venv
+.venv312
+__pycache__
+.ipynb_checkpoints
+.log
