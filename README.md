@@ -36,7 +36,7 @@ La tarea compara dos arquitecturas:
 | `notebooks/VAE.ipynb` | Desarrollo exploratorio del VAE. | Documenta la construccion inicial del modelo VAE. |
 | `notebooks/u_net.ipynb` | Desarrollo exploratorio del U-Net. | Documenta la construccion inicial del modelo U-Net. |
 | `notebooks/analisis_de_resultados.ipynb` | Notebook de analisis de resultados. | Contiene tablas, visualizaciones y analisis. |
-| `training.ipynb` | Notebook principal de entrega. | Presenta el flujo completo, resultados y conclusiones. |
+| `training.ipynb` | Notebook principal de entrega. Es el mismo que `notebooks/analisis_de_resultados.ipynb`. | Presenta el flujo completo, resultados y conclusiones. |
 | `outputs/analysis_full/` | Resultados exportados: resumen, AUC, curvas PR, t-SNE, reconstrucciones, violines y grids por defecto. | Evidencia visual y cuantitativa de los experimentos. |
 
 ## Donde revisar cada requisito
@@ -103,7 +103,6 @@ Las configuraciones de experimentos existentes cubren:
 | VAE | `vae_l1.yaml`, `vae_l2.yaml`, `vae_ssim.yaml`, `vae_ssim+l1.yaml` |
 | U-Net | `unet_l1.yaml`, `unet_l2.yaml`, `unet_ssim.yaml`, `unet_ssim+l1.yaml` |
 
-Nota: `conf/experiments/vae_l2.yaml` y `conf/experiments/vae_ssim.yaml` tienen escrita la clave `vdefaults` en vez de `defaults`. Los archivos existen y documentan la intencion del experimento, pero esa clave deberia corregirse si se desea ejecutar directamente con Hydra.
 
 ## Notebooks
 
